@@ -1243,7 +1243,7 @@ def execute_live_real_trade(
         getattr(
             config,
             "MIN_PROFIT",
-            0.01
+            0.1
         )
     )
 

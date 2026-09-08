@@ -424,7 +424,7 @@ def current_settings():
         "min_profit": getattr(
             config,
             "MIN_PROFIT",
-            0.01
+            0.1
         ),
 
         "min_profit_percent": getattr(

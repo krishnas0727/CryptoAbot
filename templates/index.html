@@ -392,7 +392,7 @@
                 <p>Set execution thresholds and intervals</p>
                 <div class="form-group">
                     <label>Minimum Net Profit (USDT)</label>
-                    <input type="number" id="minProfit" class="form-control" step="0.01" placeholder="0.50">
+                    <input type="number" id="minProfit" class="form-control" step="0.01" placeholder="0.10">
                 </div>
                 <div class="form-group">
                     <label>Auto Trade Cooldown (Seconds)</label>
@@ -782,7 +782,7 @@ function updateUIWithMarketData(result) {
 
     const oppBadge = document.getElementById("oppBadge");
     if (oppBadge) {
-        if (Number(data.net_profit) >= (data.minimum_profit || 0.5)) {
+        if (Number(data.net_profit) >= (data.minimum_profit || 0.1)) {
             oppBadge.innerText = "Profitable Opportunity";
             oppBadge.className = "badge badge-green";
         } else {
@@ -849,7 +849,7 @@ function updateUIWithMarketData(result) {
         const walletStatus = (result.summary && result.summary.wallet_status) || {};
         const binanceConn = walletStatus.Binance && walletStatus.Binance.connected;
         const bybitConn = walletStatus.Bybit && walletStatus.Bybit.connected;
-        const minProfit = data.minimum_profit || 0.01;
+        const minProfit = data.minimum_profit || 0.1;
         const currentProfit = Number(data.net_profit || 0);
 
         if (!binanceConn || !bybitConn) {
@@ -1073,7 +1073,7 @@ async function loadSettings() {
         const settings = await response.json();
         if (settings) {
             document.getElementById("autoTrade").checked = !!settings.auto_trade;
-            document.getElementById("minProfit").value = settings.minimum_profit || 0.50;
+            document.getElementById("minProfit").value = settings.minimum_profit || 0.10;
             document.getElementById("autoCooldown").value = settings.auto_trade_cooldown || 30;
             document.getElementById("tradingModeSelect").value = settings.trading_mode || "LIVE";
             document.getElementById("tradingSymbolSelect").value = settings.symbol || "BTC/USDT";
@@ -1131,8 +1131,8 @@ async function saveBotSettings() {
 
     const payload = {
         auto_trade: autoTradeEl ? autoTradeEl.checked : false,
-        min_profit: minProfitEl && minProfitEl.value !== "" ? parseFloat(minProfitEl.value) : 0.50,
-        minimum_profit: minProfitEl && minProfitEl.value !== "" ? parseFloat(minProfitEl.value) : 0.50,
+        min_profit: minProfitEl && minProfitEl.value !== "" ? parseFloat(minProfitEl.value) : 0.10,
+        minimum_profit: minProfitEl && minProfitEl.value !== "" ? parseFloat(minProfitEl.value) : 0.10,
         cooldown: autoCooldownEl && autoCooldownEl.value !== "" ? parseInt(autoCooldownEl.value) : 30,
         auto_trade_cooldown: autoCooldownEl && autoCooldownEl.value !== "" ? parseInt(autoCooldownEl.value) : 30,
         trading_mode: tradingModeEl ? tradingModeEl.value : "LIVE",

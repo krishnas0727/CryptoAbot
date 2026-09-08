@@ -101,7 +101,7 @@ MAX_BALANCE_USAGE = 0.90
 # ============================================================
 
 # Minimum NET profit required after estimated fees.
-MIN_PROFIT = 0.05
+MIN_PROFIT = 0.1
 
 # Minimum NET profit percentage required.
 MIN_PROFIT_PERCENT = 0.20

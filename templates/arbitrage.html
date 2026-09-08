@@ -399,7 +399,7 @@ async function loadArbitrage() {
         document.getElementById("profit").innerText = Number(data.net_profit).toFixed(2) + " USDT";
 
         const oppBadge = document.getElementById("oppBadge");
-        if (Number(data.net_profit) >= (data.minimum_profit || 0.5)) {
+        if (Number(data.net_profit) >= (data.minimum_profit || 0.1)) {
             oppBadge.innerText = "🟢 Profitable Opportunity";
             oppBadge.style.background = "#132b20";
             oppBadge.style.color = "#22c55e";
