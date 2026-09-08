@@ -259,7 +259,7 @@ def get_actual_wallet_balances(force_refresh=False):
     global _balance_cache, _last_known_good_balances
 
     now = time.time()
-    if not force_refresh and _balance_cache["data"] and (now - _balance_cache["timestamp"]) < 10.0:
+    if not force_refresh and _balance_cache["data"] and (now - _balance_cache["timestamp"]) < 20.0:
         return _balance_cache["data"]
 
     balances = {}
@@ -498,6 +498,12 @@ def test_exchange_connection(name):
             time.sleep(1.0)
 
     err_msg = str(last_err or "")
+    if "-1003" in err_msg or "request weight" in err_msg.lower() or "418" in err_msg:
+        return {
+            "success": False,
+            "message": f"Binance Rate Limit: Shared Render IP temporarily limited (-1003). Please wait 2-3 minutes or switch Render Region to Singapore (Asia)."
+        }
+
     if any(x in err_msg.lower() for x in ["api-key", "invalid", "auth", "signature", "permission", "capital/config", "query-info", "-2008", "-2014", "-2015", "10003"]):
         return {
             "success": False,
@@ -731,7 +737,7 @@ def get_live_prices(force_refresh=False):
     global _price_cache
 
     now = time.time()
-    if not force_refresh and _price_cache["data"] and (now - _price_cache["timestamp"]) < 1.5:
+    if not force_refresh and _price_cache["data"] and (now - _price_cache["timestamp"]) < 2.5:
         return _price_cache["data"]
 
     prices = {}

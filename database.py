@@ -223,6 +223,14 @@ def get_api_key(exchange):
     conn.close()
     if row:
         return dict(row)
+
+    # Environment variable fallback (e.g. BINANCE_API_KEY, BINANCE_API_SECRET)
+    ex_upper = exchange.upper()
+    env_key = os.environ.get(f"{ex_upper}_API_KEY") or os.environ.get(f"{ex_upper}_KEY")
+    env_secret = os.environ.get(f"{ex_upper}_API_SECRET") or os.environ.get(f"{ex_upper}_SECRET")
+    if env_key and env_secret:
+        return {"exchange": exchange, "api_key": env_key.strip(), "api_secret": env_secret.strip(), "is_active": 1}
+
     return None
 
 
