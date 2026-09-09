@@ -161,8 +161,8 @@ MAX_OPEN_TRADES = 1
 # Minimum time between automatic trade attempts.
 AUTO_TRADE_COOLDOWN = 30
 
-# Price checking interval.
-REFRESH_INTERVAL = 2
+# Price checking interval (seconds).
+REFRESH_INTERVAL = 8
 
 
 # ============================================================
