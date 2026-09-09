@@ -1096,6 +1096,10 @@ function updateAutoTradeUI(enabled) {
             badge.className = "badge badge-red";
         }
     }
+    const hToggle = document.getElementById("headerAutoTradeToggle");
+    if (hToggle) hToggle.checked = !!enabled;
+    const sToggle = document.getElementById("autoTrade");
+    if (sToggle) sToggle.checked = !!enabled;
 }
 
 async function quickToggleAutoTrade(enabled) {

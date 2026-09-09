@@ -130,11 +130,69 @@ def create_database():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS bot_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
     conn.close()
 
     # Auto-restore trades from JSON backup if database was wiped on server restart
     restore_trades_from_json_backup()
+
+
+def save_bot_setting(key, value):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS bot_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("""
+            INSERT INTO bot_settings (key, value, updated_at)
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = CURRENT_TIMESTAMP
+        """, (str(key), json.dumps(value)))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ Error saving setting {key}: {e}", flush=True)
+
+
+def load_all_bot_settings():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS bot_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("SELECT key, value FROM bot_settings")
+        rows = cursor.fetchall()
+        conn.close()
+        settings = {}
+        for row in rows:
+            try:
+                settings[row["key"]] = json.loads(row["value"])
+            except Exception:
+                settings[row["key"]] = row["value"]
+        return settings
+    except Exception as e:
+        print(f"⚠️ Error loading bot settings: {e}", flush=True)
+        return {}
 
 
 def sync_trades_to_json_backup():

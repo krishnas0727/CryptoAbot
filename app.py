@@ -13,28 +13,25 @@ from database import (
     get_all_trades,
     get_latest_trade,
     get_total_profit,
-    
     get_total_trades,
+    load_all_bot_settings,
+    save_bot_setting,
 )
-
-# =====================================================
-# WINDOWS UTF-8 OUTPUT
-# =====================================================
-
-if hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-
-
-# =====================================================
-# FLASK APP
-# =====================================================
 
 app = Flask(__name__)
 
 create_database()
+
+try:
+    _saved = load_all_bot_settings()
+    if "auto_trade" in _saved:
+        config.AUTO_TRADE_ENABLED = bool(_saved["auto_trade"])
+    if "min_profit" in _saved:
+        config.MIN_PROFIT = float(_saved["min_profit"])
+    if "trade_amount" in _saved:
+        config.DEFAULT_TRADE_AMOUNT = float(_saved["trade_amount"])
+except Exception as _e:
+    print(f"⚠️ Error restoring saved settings: {_e}", flush=True)
 
 
 
@@ -515,7 +512,9 @@ def update_settings():
     # -------------------------------------------------
 
     if "auto_trade" in request_data:
-        config.AUTO_TRADE_ENABLED = bool(request_data["auto_trade"])
+        val = bool(request_data["auto_trade"])
+        config.AUTO_TRADE_ENABLED = val
+        save_bot_setting("auto_trade", val)
 
     # MIN PROFIT
     min_prof_val = request_data.get("minimum_profit") if "minimum_profit" in request_data else request_data.get("min_profit")
