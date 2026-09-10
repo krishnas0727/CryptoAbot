@@ -172,10 +172,10 @@ SLIPPAGE_PCT = 0.05
 MAX_OPEN_TRADES = 1
 
 # Minimum time between automatic trade attempts.
-AUTO_TRADE_COOLDOWN = 30
+AUTO_TRADE_COOLDOWN = 1
 
 # Price checking interval (seconds).
-REFRESH_INTERVAL = 8
+REFRESH_INTERVAL = 1
 
 
 # ============================================================

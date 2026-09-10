@@ -1480,11 +1480,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initLiveChart();
     loadMarketData();
-    setInterval(loadMarketData, 8000);
+    setInterval(loadMarketData, 1000);
 
     // Load arb dashboard widget on page load
     loadArbDashboard();
-    setInterval(loadArbDashboard, 60000);
+    setInterval(loadArbDashboard, 1000);
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -1616,7 +1616,7 @@ function toggleArbAutoRefresh(enabled) {
     if (_arbAutoRefreshTimer) { clearInterval(_arbAutoRefreshTimer); _arbAutoRefreshTimer = null; }
     if (enabled) {
         loadArbOpportunities();
-        _arbAutoRefreshTimer = setInterval(loadArbOpportunities, 30000);
+        _arbAutoRefreshTimer = setInterval(loadArbOpportunities, 1000);
     }
 }
 
