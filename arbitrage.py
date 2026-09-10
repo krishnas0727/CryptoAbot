@@ -162,9 +162,21 @@ def analyze_market():
         fee_rate
     )
 
+    # --------------------------------------------------------
+    # DEX Gas Fee Calculation (if Uniswap involved)
+    # --------------------------------------------------------
+    dex_gas_cost_usd = 0.0
+    if buy_exchange.lower() == "uniswap" or sell_exchange.lower() == "uniswap":
+        try:
+            import dex_uniswap
+            dex_gas_cost_usd = dex_uniswap.estimate_uniswap_gas_cost_usd()
+        except Exception:
+            dex_gas_cost_usd = 0.05
+
     total_estimated_fees = (
         estimated_buy_fee +
-        estimated_sell_fee
+        estimated_sell_fee +
+        dex_gas_cost_usd
     )
 
     # ========================================================
@@ -225,6 +237,7 @@ def analyze_market():
         - worst_buy_cost
         - worst_buy_fee
         - worst_sell_fee
+        - dex_gas_cost_usd
     )
 
     # --------------------------------------------------------

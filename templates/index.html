@@ -42,6 +42,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Engine Settings</span>
         </a>
+        <a href="/chat" id="nav-chat" class="nav-link" onclick="switchTab(event, 'chat')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>AI Assistant</span>
+        </a>
     </nav>
 
     <div class="bot-status">
@@ -85,6 +89,10 @@
         <div class="ticker-item">
             <span class="ticker-name">Bybit BTC/USDT</span>
             <span class="ticker-val" id="tickerBybit">--</span>
+        </div>
+        <div class="ticker-item">
+            <span class="ticker-name">Uniswap V3 (DEX)</span>
+            <span class="ticker-val" id="tickerUniswap" style="color:var(--accent-cyan, #00e5ff);">--</span>
         </div>
         <div class="ticker-item">
             <span class="ticker-name">Current Spread</span>
@@ -200,6 +208,15 @@
                     <h3 id="bybitUsdt" style="font-family:var(--font-mono); font-size:20px; color:var(--text-bright); margin-bottom:2px;">$0.00 USDT</h3>
                     <small id="bybitBtc" style="color:var(--text-muted); font-family:var(--font-mono);">0.00000000 BTC</small>
                 </div>
+
+                <div class="ex-card">
+                    <div class="ex-card-header">
+                        <div class="ex-title">UNISWAP (DEX)</div>
+                        <span id="uniswapStatus" class="ex-badge success">● Connected</span>
+                    </div>
+                    <h3 id="uniswapUsdt" style="font-family:var(--font-mono); font-size:20px; color:var(--text-bright); margin-bottom:2px;">$0.00 USDT</h3>
+                    <small id="uniswapBtc" style="color:var(--text-muted); font-family:var(--font-mono);">0.00000000 BTC / ETH</small>
+                </div>
             </div>
         </section>
 
@@ -234,6 +251,20 @@
                 </div>
             </div>
         </section>
+
+        <!-- 🔥 HIGHEST ARBITRAGE OPPORTUNITIES WIDGET -->
+        <div class="arb-dash-widget">
+            <div class="arb-dash-title">
+                <h3>🔥 Highest Arbitrage Opportunities (Live · 11 Exchanges)</h3>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="arb-ts" id="arbDashTs">Loading...</span>
+                    <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="loadArbDashboard(true)">Refresh</button>
+                </div>
+            </div>
+            <div class="arb-dash-cards" id="arbDashCards">
+                <div class="arb-dash-loading">Fetching live arbitrage data from 11 exchanges...</div>
+            </div>
+        </div>
     </div>
 
     <!-- =====================================================
@@ -498,6 +529,121 @@
         </div>
     </div>
 
+    <!-- =====================================================
+         TAB 6: AI ARBITRAGE CHAT ASSISTANT
+    ===================================================== -->
+    <div id="view-chat" class="tab-view">
+
+        <!-- Exchange status strip -->
+        <div class="arb-ex-strip" id="arbExStrip">
+            <span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);">Loading exchange status...</span>
+        </div>
+
+        <div class="arb-chat-layout">
+
+            <!-- LEFT: Live Opportunities Table -->
+            <div class="arb-opp-panel">
+                <div class="arb-opp-header">
+                    <h3>📊 Live Arbitrage Opportunities</h3>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <select id="arbQuoteFilter" class="form-control" style="width:90px;padding:4px 6px;font-size:11px;" onchange="loadArbOpportunities()">
+                            <option value="">All pairs</option>
+                            <option value="USDT">USDT</option>
+                            <option value="INR">INR</option>
+                        </select>
+                        <select id="arbMinPctFilter" class="form-control" style="width:110px;padding:4px 6px;font-size:11px;" onchange="loadArbOpportunities()">
+                            <option value="0">All spreads</option>
+                            <option value="1">≥ 1%</option>
+                            <option value="3">≥ 3%</option>
+                            <option value="5">≥ 5%</option>
+                            <option value="10">≥ 10%</option>
+                        </select>
+                        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);cursor:pointer;">
+                            <input type="checkbox" id="arbAutoRefresh" onchange="toggleArbAutoRefresh(this.checked)"> Auto
+                        </label>
+                        <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="loadArbOpportunities(true)">Refresh</button>
+                        <span class="arb-ts" id="arbTableTs">--</span>
+                    </div>
+                </div>
+                <!-- Table header -->
+                <div class="arb-opp-row header-row">
+                    <span></span>
+                    <span>Pair</span>
+                    <span>Buy From</span>
+                    <span>Sell To</span>
+                    <span>Spread</span>
+                    <span>Net Profit%</span>
+                    <span>Status</span>
+                </div>
+                <div class="arb-opp-body" id="arbOppBody">
+                    <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;font-family:var(--font-mono);">
+                        Scanning 11 exchanges for arbitrage opportunities...
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Chat Panel -->
+            <div class="arb-chat-panel">
+                <div class="arb-chat-header">
+                    <h3><span class="arb-chat-dot"></span> Arbitrage AI Assistant</h3>
+                    <span class="arb-ts" id="chatDataTs">Live</span>
+                </div>
+
+                <!-- Quick action buttons -->
+                <div class="arb-quick-btns">
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/top')">Top 10</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/highest')">Highest</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/10percent')">10%+</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/btc')">BTC</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/eth')">ETH</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/inr')">INR Pairs</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/usdt')">USDT Pairs</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/exchanges')">Exchanges</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/profit 50')">Profit $50</button>
+                    <button class="arb-quick-btn" onclick="arbQuickMsg('/refresh')">Refresh</button>
+                </div>
+
+                <!-- Messages -->
+                <div class="arb-messages" id="arbMessages">
+                    <div class="arb-msg bot">
+                        <div class="arb-msg-bubble">👋 <strong>Arbitrage AI Assistant</strong>
+
+I scan <strong>11 crypto exchanges</strong> available to Indian users in real-time and identify profitable arbitrage opportunities.
+
+Quick commands:
+/top — top 10 opportunities
+/highest — highest spread
+/10percent — spreads ≥ 10%
+/btc  /eth  /inr  /usdt
+/profit 100 — estimate for ₹100
+/exchanges — exchange status
+/refresh — update prices
+
+Or just ask naturally:
+"Show highest price difference"
+"Where can I buy BTC cheapest?"
+"Compare BTC across all exchanges"</div>
+                        <span class="arb-msg-time">Ready</span>
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <div class="arb-input-area">
+                    <input
+                        type="text"
+                        id="arbChatInput"
+                        class="arb-input"
+                        placeholder="Ask anything or type /top..."
+                        onkeydown="if(event.key==='Enter') sendArbChat()"
+                        autocomplete="off"
+                    >
+                    <button class="arb-send-btn" id="arbSendBtn" onclick="sendArbChat()">Send</button>
+                </div>
+            </div>
+
+        </div><!-- end .arb-chat-layout -->
+    </div><!-- end #view-chat -->
+
 </main>
 
 <!-- STEP-BY-STEP EXECUTION MODAL -->
@@ -564,7 +710,8 @@ const tabTitles = {
     prices: { title: "Live Prices", subtitle: "Real-time BTC / USDT exchange price comparison" },
     arbitrage: { title: "Arbitrage Spread", subtitle: "Real-time spread analysis & order execution" },
     trades: { title: "Trade Audit Log", subtitle: "Complete ledger of executed orders & audit trail" },
-    settings: { title: "Engine Settings", subtitle: "Configure automated trading engine & exchange API keys" }
+    settings: { title: "Engine Settings", subtitle: "Configure automated trading engine & exchange API keys" },
+    chat: { title: "AI Arbitrage Assistant", subtitle: "11-exchange real-time arbitrage scanner & chat — India region" }
 };
 
 function switchTab(event_or_null, tabId) {
@@ -764,9 +911,11 @@ function updateUIWithMarketData(result) {
     if (data.prices) {
         const binanceP = parseFloat(data.prices.Binance || 0);
         const bybitP = parseFloat(data.prices.Bybit || 0);
+        const uniswapP = parseFloat(data.prices.Uniswap || 0);
 
         if (binanceP > 0 && document.getElementById("binance")) document.getElementById("binance").innerText = binanceP.toFixed(2);
         if (bybitP > 0 && document.getElementById("bybit")) document.getElementById("bybit").innerText = bybitP.toFixed(2);
+        if (uniswapP > 0 && document.getElementById("tickerUniswap")) document.getElementById("tickerUniswap").innerText = "$" + uniswapP.toFixed(2);
 
         if (binanceP > 0 && bybitP > 0) {
             pushPriceToChart(binanceP, bybitP);
@@ -802,9 +951,11 @@ function updateUIWithMarketData(result) {
 
             if (document.getElementById("binanceUsdt")) document.getElementById("binanceUsdt").innerText = "$" + Number(p.binance_usdt || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDT";
             if (document.getElementById("bybitUsdt")) document.getElementById("bybitUsdt").innerText = "$" + Number(p.bybit_usdt || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDT";
+            if (document.getElementById("uniswapUsdt")) document.getElementById("uniswapUsdt").innerText = "$" + Number(p.uniswap_usdt || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDT";
 
             if (document.getElementById("binanceBtc")) document.getElementById("binanceBtc").innerText = Number(p.binance_btc || 0).toFixed(8) + " BTC";
             if (document.getElementById("bybitBtc")) document.getElementById("bybitBtc").innerText = Number(p.bybit_btc || 0).toFixed(8) + " BTC";
+            if (document.getElementById("uniswapBtc")) document.getElementById("uniswapBtc").innerText = Number(p.uniswap_btc || 0).toFixed(8) + " BTC";
 
             const updateWalletStatus = (elementId, exchangeStatus) => {
                 const element = document.getElementById(elementId);
@@ -821,6 +972,7 @@ function updateUIWithMarketData(result) {
 
             updateWalletStatus("binanceStatus", status.Binance);
             updateWalletStatus("bybitStatus", status.Bybit);
+            updateWalletStatus("uniswapStatus", status.Uniswap || { connected: true });
 
             const updated = document.getElementById("walletLastUpdated");
             if (updated) {
@@ -1329,7 +1481,304 @@ document.addEventListener("DOMContentLoaded", () => {
     initLiveChart();
     loadMarketData();
     setInterval(loadMarketData, 8000);
+
+    // Load arb dashboard widget on page load
+    loadArbDashboard();
+    setInterval(loadArbDashboard, 60000);
 });
+
+// ═══════════════════════════════════════════════════════════════
+// AI ARBITRAGE CHAT — JavaScript
+// ═══════════════════════════════════════════════════════════════
+
+let _arbAutoRefreshTimer = null;
+const ARB_TRADE_AMOUNT = 50;
+
+// ── Utilities ────────────────────────────────────────────────
+
+function _fmtTime() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function _statusBadge(status) {
+    const map = {
+        profitable:    { cls: 'arb-badge-green',  em: '🟢', label: 'Profitable' },
+        low_margin:    { cls: 'arb-badge-yellow', em: '🟡', label: 'Low Margin' },
+        not_profitable:{ cls: 'arb-badge-red',    em: '🔴', label: 'Unprofitable' },
+        insufficient_data: { cls: 'arb-badge-gray', em: '⚠️', label: 'Insufficient' },
+    };
+    const s = map[status] || { cls: 'arb-badge-gray', em: '⚠️', label: status || '?' };
+    return `<span class="arb-badge ${s.cls}">${s.em} ${s.label}</span>`;
+}
+
+function _spreadClass(pct) {
+    if (pct >= 5) return 'spread-pos';
+    if (pct >= 1) return 'spread-low';
+    return 'spread-neg';
+}
+
+function _netPctClass(pct) {
+    if (pct > 0) return 'spread-pos';
+    return 'spread-neg';
+}
+
+// ── Exchange Status Strip ─────────────────────────────────────
+
+async function loadExchangeStatus() {
+    try {
+        const res = await fetch('/api/exchanges/status');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.success) return;
+
+        const strip = document.getElementById('arbExStrip');
+        if (!strip) return;
+
+        let html = '';
+        for (const [name, info] of Object.entries(data.exchanges)) {
+            let cls = 'offline';
+            if (info.status === 'available') cls = 'online';
+            else if (info.status === 'region_restricted') cls = 'blocked';
+
+            const dot = cls === 'online' ? '●' : cls === 'blocked' ? '⛔' : '○';
+            const title = info.error ? info.error.substring(0, 80) : (info.note || '');
+            html += `<span class="arb-ex-pill ${cls}" title="${title}">${dot} ${name}</span>`;
+        }
+        strip.innerHTML = html;
+    } catch (e) {
+        console.warn('Exchange status load error:', e);
+    }
+}
+
+// ── Opportunity Table ─────────────────────────────────────────
+
+async function loadArbOpportunities(force = false) {
+    const body   = document.getElementById('arbOppBody');
+    const tsEl   = document.getElementById('arbTableTs');
+    const quote  = (document.getElementById('arbQuoteFilter')?.value || '').toUpperCase();
+    const minPct = parseFloat(document.getElementById('arbMinPctFilter')?.value || '0');
+
+    if (!body) return;
+    body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:12px;font-family:var(--font-mono);">Scanning exchanges...</div>';
+
+    try {
+        let url = `/api/arbitrage/opportunities?amount=${ARB_TRADE_AMOUNT}`;
+        if (quote)  url += `&quote=${quote}`;
+        if (minPct) url += `&min_pct=${minPct}`;
+        if (force)  url += '&force=true';
+
+        const res  = await fetch(url);
+        const data = await res.json();
+
+        if (!data.success) {
+            body.innerHTML = `<div style="padding:16px;text-align:center;color:var(--loss-color);font-size:12px;font-family:var(--font-mono);">${data.message || 'Failed to load opportunities.'}</div>`;
+            return;
+        }
+
+        if (tsEl) tsEl.innerText = new Date().toLocaleTimeString();
+
+        const opps = data.opportunities || [];
+        if (!opps.length) {
+            body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:12px;font-family:var(--font-mono);">No opportunities match the current filter.</div>';
+            return;
+        }
+
+        let html = '';
+        opps.forEach((o, i) => {
+            const cs   = o.currency === 'INR' ? '₹' : '$';
+            const spC  = _spreadClass(o.difference_percent);
+            const netC = _netPctClass(o.net_profit_percent);
+            html += `<div class="arb-opp-row">
+                <span style="color:var(--text-muted);font-size:10px;">${i + 1}</span>
+                <span class="sym">${o.symbol}</span>
+                <span>
+                    <div style="color:var(--text-bright);font-size:11px;">${o.buy_exchange}</div>
+                    <div class="exch">${cs}${o.buy_price?.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:4}) || '--'}</div>
+                </span>
+                <span>
+                    <div style="color:var(--text-bright);font-size:11px;">${o.sell_exchange}</div>
+                    <div class="exch">${cs}${o.sell_price?.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:4}) || '--'}</div>
+                </span>
+                <span class="${spC}">${o.difference_percent >= 0 ? '+' : ''}${o.difference_percent?.toFixed(3)}%</span>
+                <span class="${netC}">${o.net_profit_percent >= 0 ? '+' : ''}${o.net_profit_percent?.toFixed(3)}%</span>
+                ${_statusBadge(o.status)}
+            </div>`;
+        });
+        body.innerHTML = html;
+
+    } catch (e) {
+        console.error('Arb opportunities error:', e);
+        body.innerHTML = `<div style="padding:16px;text-align:center;color:var(--loss-color);font-size:12px;font-family:var(--font-mono);">Error loading opportunities: ${e.message}</div>`;
+    }
+}
+
+function toggleArbAutoRefresh(enabled) {
+    if (_arbAutoRefreshTimer) { clearInterval(_arbAutoRefreshTimer); _arbAutoRefreshTimer = null; }
+    if (enabled) {
+        loadArbOpportunities();
+        _arbAutoRefreshTimer = setInterval(loadArbOpportunities, 30000);
+    }
+}
+
+// ── Dashboard Widget ──────────────────────────────────────────
+
+async function loadArbDashboard(force = false) {
+    const cards = document.getElementById('arbDashCards');
+    const tsEl  = document.getElementById('arbDashTs');
+    if (!cards) return;
+
+    try {
+        const url = `/api/arbitrage/dashboard?amount=${ARB_TRADE_AMOUNT}${force ? '&force=true' : ''}`;
+        const res  = await fetch(url);
+        const data = await res.json();
+
+        if (!data.success) {
+            cards.innerHTML = '<div class="arb-dash-loading">Data unavailable. Try refreshing.</div>';
+            return;
+        }
+
+        if (tsEl) tsEl.innerText = new Date().toLocaleTimeString();
+
+        const items = [
+            { label: '🔝 Highest Spread',   opp: data.highest_spread },
+            { label: '💰 Best Net Profit',   opp: data.highest_net    },
+            { label: '💧 Most Liquid',       opp: data.most_liquid    },
+            { label: '₿ Best BTC',           opp: data.best_btc       },
+            { label: '⟠ Best ETH',           opp: data.best_eth       },
+        ];
+
+        let html = '';
+        for (const item of items) {
+            const o = item.opp;
+            if (!o) {
+                html += `<div class="arb-dash-card">
+                    <div class="arb-dash-card-label">${item.label}</div>
+                    <div class="arb-dash-card-sym" style="color:var(--text-muted);">No data</div>
+                </div>`;
+                continue;
+            }
+            const cs    = o.currency === 'INR' ? '₹' : '$';
+            const color = o.net_profit_percent > 0 ? 'var(--profit-color)' : 'var(--loss-color)';
+            html += `<div class="arb-dash-card" title="${o.buy_exchange} → ${o.sell_exchange}">
+                <div class="arb-dash-card-label">${item.label}</div>
+                <div class="arb-dash-card-sym">${o.symbol}</div>
+                <div class="arb-dash-card-route">${o.buy_exchange} → ${o.sell_exchange}</div>
+                <div class="arb-dash-card-spread" style="color:${color}">
+                    Spread ${o.difference_percent >= 0 ? '+' : ''}${o.difference_percent?.toFixed(2)}%
+                    &nbsp;|&nbsp; Net ${o.net_profit_percent >= 0 ? '+' : ''}${o.net_profit_percent?.toFixed(2)}%
+                </div>
+            </div>`;
+        }
+        cards.innerHTML = html || '<div class="arb-dash-loading">No opportunities found.</div>';
+
+    } catch (e) {
+        console.warn('Dashboard widget error:', e);
+        if (cards) cards.innerHTML = '<div class="arb-dash-loading">Failed to load. Retry later.</div>';
+    }
+}
+
+// ── Chat Send / Receive ───────────────────────────────────────
+
+function _appendMsg(role, text, time) {
+    const container = document.getElementById('arbMessages');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = `arb-msg ${role}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'arb-msg-bubble';
+    bubble.textContent = text;
+
+    const ts = document.createElement('span');
+    ts.className = 'arb-msg-time';
+    ts.textContent = time || _fmtTime();
+
+    div.appendChild(bubble);
+    div.appendChild(ts);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return div;
+}
+
+function _showTyping() {
+    const container = document.getElementById('arbMessages');
+    if (!container) return null;
+    const div = document.createElement('div');
+    div.className = 'arb-msg bot';
+    div.id = 'arbTypingIndicator';
+    div.innerHTML = `<div class="arb-typing"><span></span><span></span><span></span></div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return div;
+}
+
+function _removeTyping() {
+    const el = document.getElementById('arbTypingIndicator');
+    if (el) el.remove();
+}
+
+async function sendArbChat() {
+    const input   = document.getElementById('arbChatInput');
+    const sendBtn = document.getElementById('arbSendBtn');
+    const message = (input?.value || '').trim();
+    if (!message) return;
+
+    input.value = '';
+    _appendMsg('user', message);
+
+    const typing = _showTyping();
+    if (sendBtn) sendBtn.disabled = true;
+
+    try {
+        const res = await fetch('/api/chat', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ message, trade_amount: ARB_TRADE_AMOUNT }),
+        });
+        const data = await res.json();
+        _removeTyping();
+
+        const reply = data.reply || (data.success === false ? (data.message || 'Error') : 'No response');
+        _appendMsg('bot', reply, new Date().toLocaleTimeString());
+
+        const tsEl = document.getElementById('chatDataTs');
+        if (tsEl && data.timestamp) {
+            tsEl.innerText = 'Updated ' + new Date(data.timestamp).toLocaleTimeString();
+        }
+
+        // If this was a /refresh command, reload the table too
+        if (message.trim().toLowerCase() === '/refresh') {
+            loadArbOpportunities(true);
+            loadExchangeStatus();
+        }
+
+    } catch (e) {
+        _removeTyping();
+        _appendMsg('bot', '⚠️ Network error: ' + e.message);
+    } finally {
+        if (sendBtn) sendBtn.disabled = false;
+        if (input) input.focus();
+    }
+}
+
+function arbQuickMsg(cmd) {
+    const input = document.getElementById('arbChatInput');
+    if (input) { input.value = cmd; }
+    sendArbChat();
+}
+
+// ── Hook into existing switchTab to load data when Chat tab opens ──
+
+const _origSwitchTab = switchTab;
+switchTab = function(event_or_null, tabId) {
+    _origSwitchTab(event_or_null, tabId);
+    const clean = (tabId || '').replace('/', '').trim() || 'dashboard';
+    if (clean === 'chat') {
+        loadExchangeStatus();
+        loadArbOpportunities();
+    }
+};
 </script>
 </body>
 </html>

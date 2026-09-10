@@ -267,10 +267,38 @@ def get_actual_wallet_balances(force_refresh=False):
         "Binance",
         "Bybit"
     ]
+    if "Uniswap" in config.SUPPORTED_EXCHANGES:
+        exchange_names.append("Uniswap")
 
     for exchange_name in exchange_names:
 
         try:
+            if exchange_name.lower() == "uniswap":
+                try:
+                    import dex_uniswap
+                    wallet_addr = getattr(config, "DEX_WALLET_ADDRESS", "")
+                    dex_bals = dex_uniswap.get_uniswap_balances(wallet_addr)
+                    balances["Uniswap"] = {
+                        "connected": True,
+                        "usdt": round(dex_bals.get("free_usdt", 0.0), 2),
+                        "total_usdt": round(dex_bals.get("USDT", 0.0) + dex_bals.get("USDC", 0.0), 2),
+                        "btc": round(dex_bals.get("free_btc", 0.0), 6),
+                        "total_btc": round(dex_bals.get("BTC", 0.0) + dex_bals.get("WBTC", 0.0), 6),
+                        "eth": round(dex_bals.get("ETH", 0.0), 4),
+                        "wallet_address": wallet_addr if wallet_addr else "Not Configured",
+                        "chain": getattr(config, "DEX_CHAIN", "arbitrum"),
+                        "error": None
+                    }
+                except Exception as dex_e:
+                    balances["Uniswap"] = {
+                        "connected": False,
+                        "usdt": 0.0,
+                        "total_usdt": 0.0,
+                        "btc": 0.0,
+                        "total_btc": 0.0,
+                        "error": str(dex_e)
+                    }
+                continue
 
             # ------------------------------------------------
             # GET AUTHENTICATED INSTANCE
@@ -670,6 +698,19 @@ def get_direct_price(
             except Exception:
                 continue
 
+    # ========================================================
+    # UNISWAP (DEX)
+    # ========================================================
+
+    elif name.lower() == "uniswap":
+        try:
+            import dex_uniswap
+            price = dex_uniswap.get_uniswap_live_price(symbol)
+            if price and float(price) > 0:
+                return float(price)
+        except Exception:
+            pass
+
     return None
 
 
@@ -685,7 +726,6 @@ def fetch_single_exchange_price(
         name_and_exchange
     )
 
-
     fetched_price = (
         get_direct_price(
             name,
@@ -693,8 +733,7 @@ def fetch_single_exchange_price(
         )
     )
 
-
-    if fetched_price is None:
+    if fetched_price is None and exchange is not None:
 
         try:
 
@@ -704,11 +743,9 @@ def fetch_single_exchange_price(
                 )
             )
 
-
             last_price = ticker.get(
                 "last"
             )
-
 
             if (
                 last_price
@@ -719,11 +756,9 @@ def fetch_single_exchange_price(
                     last_price
                 )
 
-
         except Exception:
 
             pass
-
 
     return name, fetched_price
 
@@ -742,14 +777,18 @@ def get_live_prices(force_refresh=False):
 
     prices = {}
 
+    target_exchanges = exchanges.copy()
+    if "Uniswap" in config.SUPPORTED_EXCHANGES:
+        target_exchanges["Uniswap"] = None
+
     with concurrent.futures.ThreadPoolExecutor(
-        max_workers=2
+        max_workers=3
     ) as executor:
 
         results = list(
             executor.map(
                 fetch_single_exchange_price,
-                exchanges.items()
+                target_exchanges.items()
             )
         )
 

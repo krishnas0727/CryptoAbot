@@ -14,13 +14,26 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ============================================================
 # EXCHANGES
-# ONLY BINANCE AND BYBIT ARE SUPPORTED
+# BINANCE, BYBIT, AND UNISWAP (DEX) ARE SUPPORTED
 # ============================================================
 
 SUPPORTED_EXCHANGES = [
     "Binance",
     "Bybit",
+    "Uniswap",
 ]
+
+# ============================================================
+# DEX / UNISWAP CONFIGURATION
+# ============================================================
+
+DEX_ENABLED = os.getenv("DEX_ENABLED", "True").lower() == "true"
+DEX_CHAIN = os.getenv("DEX_CHAIN", "arbitrum")  # "arbitrum" or "base"
+DEX_RPC_URL = os.getenv("DEX_RPC_URL", "")
+DEX_WALLET_ADDRESS = os.getenv("DEX_WALLET_ADDRESS", "")
+DEX_PRIVATE_KEY = os.getenv("DEX_PRIVATE_KEY", "")
+DEX_SLIPPAGE_PCT = float(os.getenv("DEX_SLIPPAGE_PCT", "0.5"))
+
 
 
 # ============================================================
@@ -244,8 +257,8 @@ def validate_config():
             "No exchanges configured."
         )
 
-    # Make sure only Binance and Bybit are configured.
-    allowed_exchanges = {"Binance", "Bybit"}
+    # Supported exchanges
+    allowed_exchanges = {"Binance", "Bybit", "Uniswap"}
 
     for exchange in SUPPORTED_EXCHANGES:
         if exchange not in allowed_exchanges:

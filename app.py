@@ -20,6 +20,16 @@ from database import (
 
 app = Flask(__name__)
 
+# =====================================================
+# REGISTER AI ARBITRAGE CHAT BLUEPRINT
+# =====================================================
+try:
+    from backend.routes.arbitrage_routes import arbitrage_bp
+    app.register_blueprint(arbitrage_bp)
+    print("✅ AI Arbitrage Chat blueprint registered.", flush=True)
+except Exception as _bp_err:
+    print(f"⚠️ Could not register arbitrage blueprint: {_bp_err}", flush=True)
+
 create_database()
 
 try:
@@ -799,6 +809,13 @@ def market_data():
             ) or {}
         )
 
+        uniswap = (
+            live_balances.get(
+                "Uniswap",
+                {}
+            ) or {}
+        )
+
         # -------------------------------------------------
         # REAL PORTFOLIO
         # -------------------------------------------------
@@ -832,6 +849,20 @@ def market_data():
                     0
                 ) or 0
             ),
+
+            "uniswap_usdt": float(
+                uniswap.get(
+                    "total_usdt",
+                    0
+                ) or 0
+            ),
+
+            "uniswap_btc": float(
+                uniswap.get(
+                    "total_btc",
+                    0
+                ) or 0
+            ),
         }
 
         # -------------------------------------------------
@@ -846,6 +877,10 @@ def market_data():
             real_portfolio[
                 "bybit_usdt"
             ]
+            +
+            real_portfolio[
+                "uniswap_usdt"
+            ]
         )
 
         # -------------------------------------------------
@@ -859,6 +894,10 @@ def market_data():
             +
             real_portfolio[
                 "bybit_btc"
+            ]
+            +
+            real_portfolio[
+                "uniswap_btc"
             ]
         )
 
