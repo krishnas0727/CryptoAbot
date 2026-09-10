@@ -65,7 +65,7 @@ TRADING_MODE = "LIVE"
 #
 # Keep this False until all testing is completed.
 
-AUTO_TRADE_ENABLED = False
+AUTO_TRADE_ENABLED = os.getenv("AUTO_TRADE_ENABLED", "True").lower() == "true"
 
 
 # ============================================================
@@ -114,10 +114,10 @@ MAX_BALANCE_USAGE = 0.90
 # ============================================================
 
 # Minimum NET profit required after estimated fees.
-MIN_PROFIT = 0.1
+MIN_PROFIT = float(os.getenv("MIN_PROFIT", "0.005"))
 
 # Minimum NET profit percentage required.
-MIN_PROFIT_PERCENT = 0.20
+MIN_PROFIT_PERCENT = float(os.getenv("MIN_PROFIT_PERCENT", "0.01"))
 
 
 # ============================================================
